@@ -1,0 +1,40 @@
+name: Salesforce to Instantly Sync
+
+on:
+  schedule:
+    # 10:00 PM IST = 04:30 PM UTC (16:30)
+    - cron: '30 16 * * *'
+  workflow_dispatch: # Manual test ke liye button
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install simple-salesforce requests python-dotenv gspread oauth2client
+
+      - name: Create Google Credentials File
+        # GCP_SERVICE_ACCOUNT_FILE secret mein pura JSON text paste karein
+        run: echo '${{ secrets.GCP_SERVICE_ACCOUNT_FILE }}' > creds.json
+
+      - name: Run sync script
+        env:
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+          SF_TOKEN: ${{ secrets.SF_TOKEN }}
+          DEBOUNCE_API_KEY: ${{ secrets.DEBOUNCE_API_KEY }}
+          INSTANTLY_API_KEY: ${{ secrets.INSTANTLY_API_KEY }}
+          CAMPAIGN_ID_PRICING: ${{ secrets.CAMPAIGN_ID_PRICING }}
+          CAMPAIGN_ID_BLOGS: ${{ secrets.CAMPAIGN_ID_BLOGS }}
+          CAMPAIGN_ID_COMPARE: ${{ secrets.CAMPAIGN_ID_COMPARE }}
+          CAMPAIGN_ID_HOME: ${{ secrets.CAMPAIGN_ID_HOME }}
+        run: python sync.py
