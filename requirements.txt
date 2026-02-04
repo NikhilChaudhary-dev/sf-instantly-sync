@@ -1,0 +1,5 @@
+simple-salesforce
+requests
+python-dotenv
+gspread
+oauth2client
